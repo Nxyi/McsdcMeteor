@@ -1,7 +1,7 @@
 package com.mcsdc.addon.gui;
 
 import com.mcsdc.addon.system.McsdcSystem;
-import com.mcsdc.addon.system.ServerStorage;
+import com.mcsdc.addon.system.ServerEntry;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -46,7 +46,7 @@ public class RecentServersScreen extends WindowScreen {
         table.add(theme.horizontalSeparator()).expandX();
 
         // Reverse list so most recent shows at the top
-        List<ServerStorage> reversed = McsdcSystem.get().getRecentServers();
+        List<ServerEntry> reversed = McsdcSystem.get().getRecentServers();
         Collections.reverse(reversed);
 
         reversed.forEach((serverStorage) -> {

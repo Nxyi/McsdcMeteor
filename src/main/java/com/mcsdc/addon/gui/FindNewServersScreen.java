@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.system.McsdcSystem;
-import com.mcsdc.addon.system.ServerStorage;
+import com.mcsdc.addon.system.ServerEntry;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
@@ -101,7 +101,7 @@ public class FindNewServersScreen extends WindowScreen {
         this.multiplayerScreen = multiplayerScreen;
     }
 
-    List<ServerStorage> extractedServers;
+    List<ServerEntry> extractedServers;
     @Override
     public void initWidgets() {
         WContainer settingsContainer = add(theme.verticalList()).widget();
@@ -109,7 +109,7 @@ public class FindNewServersScreen extends WindowScreen {
 
         this.settingsContainer = settingsContainer;
 
-        add(theme.button("search")).expandX().widget().action = () -> {
+        add(theme.button("Search")).expandX().widget().action = () -> {
             reload();
 
             CompletableFuture.supplyAsync(() -> {
@@ -175,10 +175,11 @@ public class FindNewServersScreen extends WindowScreen {
                     add(theme.label("No servers found."));
                     return;
                 }
+                Main.getServerStorage().setList(extractedServers);
 
                 WHorizontalList buttons = add(theme.horizontalList()).expandX().widget();
                 WTable table = add(theme.table()).widget();
-                buttons.add(theme.button("add all")).expandX().widget().action = () -> {
+                buttons.add(theme.button("Add All")).expandX().widget().action = () -> {
                     extractedServers.forEach((server) -> {
                         ServerInfo info = new ServerInfo("Mcsdc " + server.ip, server.ip, ServerInfo.ServerType.OTHER);
                         multiplayerScreen.getServerList().add(info, false);
@@ -187,7 +188,7 @@ public class FindNewServersScreen extends WindowScreen {
                     multiplayerScreen.getServerList().loadFile();
                 };
 
-                buttons.add(theme.button("randomize")).expandX().widget().action = () -> {
+                buttons.add(theme.button("Randomize")).expandX().widget().action = () -> {
                     Collections.shuffle(extractedServers);
 
                     generateWidgets(extractedServers, table);
@@ -199,7 +200,7 @@ public class FindNewServersScreen extends WindowScreen {
         };
     }
 
-    public void generateWidgets(List<ServerStorage> extractedServers, final WTable table){
+    public void generateWidgets(List<ServerEntry> extractedServers, final WTable table){
         MinecraftClient.getInstance().execute(() -> {
             table.clear();
 
@@ -245,14 +246,14 @@ public class FindNewServersScreen extends WindowScreen {
         });
     }
 
-    public static List<ServerStorage> extractServerInfo(String jsonResponse) {
-        List<ServerStorage> serverStorageList = new ArrayList<>();
+    public static List<ServerEntry> extractServerInfo(String jsonResponse) {
+        List<ServerEntry> serverStorageList = new ArrayList<>();
         JsonArray jsonObject = JsonParser.parseString(jsonResponse).getAsJsonArray();
 
         jsonObject.forEach(node -> {
             String address = node.getAsJsonObject().get("address").getAsString();
             String version = node.getAsJsonObject().get("version").getAsString();
-            serverStorageList.add(new ServerStorage(address, version));
+            serverStorageList.add(new ServerEntry(address, version));
         });
 
         return serverStorageList;
