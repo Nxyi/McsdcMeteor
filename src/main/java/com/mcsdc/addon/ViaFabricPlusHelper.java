@@ -21,21 +21,21 @@ public class ViaFabricPlusHelper {
         }
         try {
             Class<?> protocolVersionListClass = Class.forName("com.viaversion.vialoader.util.ProtocolVersionList");
-            Method getProtocolsNewToOldMethod = protocolVersionListClass.getMethod("getProtocolsNewToOld", new Class[0]);
+            Method getProtocolsNewToOldMethod = protocolVersionListClass.getMethod("getProtocolsNewToOld");
             List<?> protocols = (List) getProtocolsNewToOldMethod.invoke(null, new Object[0]);
             for (Object protocol : protocols) {
-                Method isSnapshotMethod = protocol.getClass().getMethod("isSnapshot", new Class[0]);
-                Method getSnapshotVersionMethod = protocol.getClass().getMethod("getSnapshotVersion", new Class[0]);
-                Method getFullSnapshotVersionMethod = protocol.getClass().getMethod("getFullSnapshotVersion", new Class[0]);
-                Method getVersionMethod = protocol.getClass().getMethod("getVersion", new Class[0]);
-                if (((Boolean) isSnapshotMethod.invoke(protocol, new Object[0])).booleanValue()) {
-                    int snapshotVersion = ((Integer) getSnapshotVersionMethod.invoke(protocol, new Object[0])).intValue();
-                    int fullSnapshotVersion = ((Integer) getFullSnapshotVersionMethod.invoke(protocol, new Object[0])).intValue();
+                Method isSnapshotMethod = protocol.getClass().getMethod("isSnapshot");
+                Method getSnapshotVersionMethod = protocol.getClass().getMethod("getSnapshotVersion");
+                Method getFullSnapshotVersionMethod = protocol.getClass().getMethod("getFullSnapshotVersion");
+                Method getVersionMethod = protocol.getClass().getMethod("getVersion");
+                if ((Boolean) isSnapshotMethod.invoke(protocol, new Object[0])) {
+                    int snapshotVersion = (Integer) getSnapshotVersionMethod.invoke(protocol, new Object[0]);
+                    int fullSnapshotVersion = (Integer) getFullSnapshotVersionMethod.invoke(protocol, new Object[0]);
                     if (snapshotVersion == protocolVersion || fullSnapshotVersion == protocolVersion) {
                         return true;
                     }
                 } else {
-                    int version = ((Integer) getVersionMethod.invoke(protocol, new Object[0])).intValue();
+                    int version = (Integer) getVersionMethod.invoke(protocol, new Object[0]);
                     if (version == protocolVersion) {
                         return true;
                     }
@@ -54,20 +54,20 @@ public class ViaFabricPlusHelper {
         }
         try {
             Class<?> protocolVersionListClass = Class.forName("com.viaversion.vialoader.util.ProtocolVersionList");
-            Method getProtocolsNewToOldMethod = protocolVersionListClass.getMethod("getProtocolsNewToOld", new Class[0]);
+            Method getProtocolsNewToOldMethod = protocolVersionListClass.getMethod("getProtocolsNewToOld");
             List<?> protocols = (List) getProtocolsNewToOldMethod.invoke(null, new Object[0]);
             Optional<?> protocolVersion = protocols.stream().filter(x -> {
                 try {
-                    Method isSnapshotMethod = x.getClass().getMethod("isSnapshot", new Class[0]);
-                    Method getSnapshotVersionMethod = x.getClass().getMethod("getSnapshotVersion", new Class[0]);
-                    Method getFullSnapshotVersionMethod = x.getClass().getMethod("getFullSnapshotVersion", new Class[0]);
-                    Method getVersionMethod = x.getClass().getMethod("getVersion", new Class[0]);
-                    if (((Boolean) isSnapshotMethod.invoke(x, new Object[0])).booleanValue()) {
-                        int snapshotVersion = ((Integer) getSnapshotVersionMethod.invoke(x, new Object[0])).intValue();
-                        int fullSnapshotVersion = ((Integer) getFullSnapshotVersionMethod.invoke(x, new Object[0])).intValue();
+                    Method isSnapshotMethod = x.getClass().getMethod("isSnapshot");
+                    Method getSnapshotVersionMethod = x.getClass().getMethod("getSnapshotVersion");
+                    Method getFullSnapshotVersionMethod = x.getClass().getMethod("getFullSnapshotVersion");
+                    Method getVersionMethod = x.getClass().getMethod("getVersion");
+                    if (((Boolean) isSnapshotMethod.invoke(x, new Object[0]))) {
+                        int snapshotVersion = ((Integer) getSnapshotVersionMethod.invoke(x, new Object[0]));
+                        int fullSnapshotVersion = ((Integer) getFullSnapshotVersionMethod.invoke(x, new Object[0]));
                         return snapshotVersion == serverProtocolVersion || fullSnapshotVersion == serverProtocolVersion;
                     }
-                    int version = ((Integer) getVersionMethod.invoke(x, new Object[0])).intValue();
+                    int version = ((Integer) getVersionMethod.invoke(x, new Object[0]));
                     return version == serverProtocolVersion;
                 } catch (Exception e) {
                     LOGGER.error("Failed to check protocol version: {}", e.getMessage());
@@ -76,14 +76,14 @@ public class ViaFabricPlusHelper {
             }).findFirst();
             if (protocolVersion.isPresent()) {
                 Class<?> protocolVersionClass = Class.forName("com.viaversion.viaversion.api.protocol.version.ProtocolVersion");
-                Method getNameMethod = protocolVersionClass.getMethod("getName", new Class[0]);
-                Method getVersionMethod = protocolVersionClass.getMethod("getVersion", new Class[0]);
+                Method getNameMethod = protocolVersionClass.getMethod("getName");
+                Method getVersionMethod = protocolVersionClass.getMethod("getVersion");
                 String versionName = (String) getNameMethod.invoke(protocolVersion.get(), new Object[0]);
-                int versionNumber = ((Integer) getVersionMethod.invoke(protocolVersion.get(), new Object[0])).intValue();
+                int versionNumber = ((Integer) getVersionMethod.invoke(protocolVersion.get(), new Object[0]));
                 Class<?> serverInfoClass = serverInfo.getClass();
                 Method forceVersionMethod = serverInfoClass.getMethod("viaFabricPlus$forceVersion", protocolVersionClass);
                 forceVersionMethod.invoke(serverInfo, protocolVersion.get());
-                LOGGER.info("Setting version for server to {} ({})", versionName, Integer.valueOf(versionNumber));
+                LOGGER.info("Setting version for server to {} ({})", versionName, versionNumber);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to force protocol version: {}", e.getMessage());

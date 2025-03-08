@@ -52,6 +52,7 @@ public abstract class ServerEntryMixin extends MultiplayerServerListWidget.Entry
             try {
                 this.screen.getServerListPinger().add(this.server, () -> this.client.execute(this::saveFile), () -> {
                     if (ViaFabricPlusHelper.isViaFabricPlusLoaded()) {
+                        ViaFabricPlusHelper.forceProtocolVersion(this.server, this.server.protocolVersion);
                         if (ViaFabricPlusHelper.isProtocolSupported(this.server.protocolVersion)) {
                             // protocol version is supported
                             this.server.setStatus(ServerInfo.Status.SUCCESSFUL);

@@ -15,7 +15,7 @@ public class McsdcSystem extends System<McsdcSystem> {
     private String token = "";
     private String username = "";
     private int level = -1;
-    private List<ServerEntry> recentServers = new ArrayList<>();
+    private final List<ServerEntry> recentServers = new ArrayList<>();
 
     public McsdcSystem() {
         super("McsdcSystem");
@@ -79,7 +79,6 @@ public class McsdcSystem extends System<McsdcSystem> {
         });
 
         compound.put("recent", list);
-
 
         return compound;
     }

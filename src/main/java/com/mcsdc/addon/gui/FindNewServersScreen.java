@@ -175,7 +175,6 @@ public class FindNewServersScreen extends WindowScreen {
                     add(theme.label("No servers found."));
                     return;
                 }
-                Main.getServerStorage().setList(extractedServers);
 
                 WHorizontalList buttons = add(theme.horizontalList()).expandX().widget();
                 WTable table = add(theme.table()).widget();
