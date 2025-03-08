@@ -42,9 +42,11 @@ public class ConnectScreenMixin {
         if (ViaFabricPlusHelper.isViaFabricPlusLoaded()) {
             ServerStorage serverStorage = Main.getServerStorage();
             server = serverStorage.getServerEntry(info.address);
-            Integer serverProtocolVersion = extractProtocolVersion(server.version);
-            if (serverProtocolVersion != null) {
-                ViaFabricPlusHelper.forceProtocolVersion(info, serverProtocolVersion);
+            if(server != null) {
+                Integer serverProtocolVersion = extractProtocolVersion(server.version);
+                if (serverProtocolVersion != null) {
+                    ViaFabricPlusHelper.forceProtocolVersion(info, serverProtocolVersion);
+                }
             }
         }
     }
