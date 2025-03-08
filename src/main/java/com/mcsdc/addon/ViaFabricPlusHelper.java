@@ -83,7 +83,6 @@ public class ViaFabricPlusHelper {
                 Class<?> serverInfoClass = serverInfo.getClass();
                 Method forceVersionMethod = serverInfoClass.getMethod("viaFabricPlus$forceVersion", protocolVersionClass);
                 forceVersionMethod.invoke(serverInfo, protocolVersion.get());
-                LOGGER.info("Setting version for server to {} ({})", versionName, versionNumber);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to force protocol version: {}", e.getMessage());
