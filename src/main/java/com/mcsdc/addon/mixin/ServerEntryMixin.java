@@ -1,7 +1,6 @@
 package com.mcsdc.addon.mixin;
 
-import com.viaversion.vialoader.util.ProtocolVersionList;
-import net.fabricmc.loader.api.FabricLoader;
+import com.mcsdc.addon.ViaFabricPlusHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -52,16 +51,8 @@ public abstract class ServerEntryMixin extends MultiplayerServerListWidget.Entry
         return () -> {
             try {
                 this.screen.getServerListPinger().add(this.server, () -> this.client.execute(this::saveFile), () -> {
-                    if (FabricLoader.getInstance().isModLoaded("viafabricplus")) {
-                        // if viafabric is available, we can check if it supports the servers protocol version
-                        boolean isSupportedProtocol = ProtocolVersionList.getProtocolsNewToOld().stream().anyMatch(x -> {
-                            if (x.isSnapshot()) {
-                                return (x.getSnapshotVersion() == this.server.protocolVersion) || (x.getFullSnapshotVersion() == this.server.protocolVersion);
-                            } else {
-                                return x.getVersion() == this.server.protocolVersion;
-                            }
-                        });
-                        if (isSupportedProtocol) {
+                    if (ViaFabricPlusHelper.isViaFabricPlusLoaded()) {
+                        if (ViaFabricPlusHelper.isProtocolSupported(this.server.protocolVersion)) {
                             // protocol version is supported
                             this.server.setStatus(ServerInfo.Status.SUCCESSFUL);
                         } else {

@@ -17,26 +17,6 @@ repositories {
         name = "meteor-maven-snapshots"
         url = uri("https://maven.meteordev.org/snapshots")
     }
-    maven {
-        name = "ViaVersion"
-        url = uri("https://repo.viaversion.com")
-    }
-    maven {
-        name = "Lenni0451"
-        url = uri("https://maven.lenni0451.net/everything")
-    }
-    maven {
-        name = "TerraformersMC"
-        url = uri("https://maven.terraformersmc.com/releases")
-    }
-    maven {
-        name = "OpenCollab Snapshots"
-        url = uri("https://repo.opencollab.dev/maven-snapshots/")
-    }
-    maven {
-        name = "JitPack"
-        url = uri("https://jitpack.io")
-    }
 }
 
 dependencies {
@@ -47,9 +27,6 @@ dependencies {
 
     // Meteor
     modImplementation("meteordevelopment:meteor-client:${properties["minecraft_version"] as String}-SNAPSHOT")
-
-    // ViaFabric
-    modImplementation("com.viaversion:viafabricplus:${properties["viafabricplus_version"]}")
 }
 
 tasks {
