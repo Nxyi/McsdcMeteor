@@ -81,3 +81,7 @@ tasks {
         options.release = 21
     }
 }
+
+loom {
+    accessWidenerPath = file("src/main/resources/mcsdc.accesswidener")
+}
