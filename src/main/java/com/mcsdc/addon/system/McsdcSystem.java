@@ -15,7 +15,7 @@ public class McsdcSystem extends System<McsdcSystem> {
     private String token = "";
     private String username = "";
     private int level = -1;
-    private List<ServerStorage> recentServers = new ArrayList<>();
+    private final List<ServerEntry> recentServers = new ArrayList<>();
 
     public McsdcSystem() {
         super("McsdcSystem");
@@ -49,12 +49,12 @@ public class McsdcSystem extends System<McsdcSystem> {
         this.level = level;
     }
 
-    public List<ServerStorage> getRecentServers() {
+    public List<ServerEntry> getRecentServers() {
         return recentServers;
     }
 
-    public ServerStorage getRecentServerWithIp(String ip){
-        for (ServerStorage server : recentServers){
+    public ServerEntry getRecentServerWithIp(String ip){
+        for (ServerEntry server : recentServers){
             if (Objects.equals(server.ip, ip)){
                 return server;
             }
@@ -80,7 +80,6 @@ public class McsdcSystem extends System<McsdcSystem> {
 
         compound.put("recent", list);
 
-
         return compound;
     }
 
@@ -96,7 +95,7 @@ public class McsdcSystem extends System<McsdcSystem> {
             String ip = compound.getString("ip");
             String ver = compound.getString("version");
 
-            recentServers.add(new ServerStorage(ip, ver));
+            recentServers.add(new ServerEntry(ip, ver));
         }
 
         // reverse servers to ensure they are in the correct order. or they would flip each time.

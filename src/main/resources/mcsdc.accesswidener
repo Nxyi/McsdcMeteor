@@ -1,0 +1,4 @@
+accessWidener	v1	named
+
+accessible field net/minecraft/client/gui/screen/multiplayer/MultiplayerServerListWidget CANNOT_RESOLVE_TEXT Lnet/minecraft/text/Text;
+accessible field net/minecraft/client/gui/screen/multiplayer/MultiplayerServerListWidget CANNOT_CONNECT_TEXT Lnet/minecraft/text/Text;

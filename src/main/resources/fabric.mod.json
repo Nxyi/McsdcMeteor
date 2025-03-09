@@ -17,6 +17,7 @@
       "com.mcsdc.addon.Main"
     ]
   },
+  "accessWidener": "mcsdc.accesswidener",
   "mixins": [
     "mcsdc.mixins.json"
   ],
