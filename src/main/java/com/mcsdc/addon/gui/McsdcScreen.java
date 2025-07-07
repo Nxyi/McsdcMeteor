@@ -55,7 +55,7 @@ public class McsdcScreen extends WindowScreen {
         WButton findPlayersButton = widgetList.add(this.theme.button("Search players")).expandX().widget();
         WButton recentServersButton = widgetList.add(this.theme.button("Recent Servers")).expandX().widget();
         WButton removeServersButton = widgetList.add(this.theme.button("Remove Servers")).expandX().widget();
-        WButton tickedIdScreenButton = widgetList.add(this.theme.button("TickedID search")).expandX().widget();
+        WButton tickedIdScreenButton = widgetList.add(this.theme.button("TicketID search")).expandX().widget();
 
 
         newServersButton.action = () -> {
