@@ -1,5 +1,6 @@
 package com.mcsdc.addon.commands;
 
+import com.mcsdc.addon.Main;
 import com.mcsdc.addon.util.TicketIDGenerator;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
@@ -15,7 +16,7 @@ public class TicketIDCommand extends Command {
         literalArgumentBuilder.executes(context -> {
             String IP = mc.getNetworkHandler().getServerInfo().address;
 
-            mc.keyboard.setClipboard(TicketIDGenerator.generateTicketID(IP));
+            mc.keyboard.setClipboard(Main.getTicketID());
             return 1;
         });
     }
