@@ -37,8 +37,6 @@ public class Main extends MeteorAddon {
 
     public static String getTicketID(){
         if (mc == null || mc.getNetworkHandler() == null) return "";
-        String address = MinecraftClient.getInstance().getNetworkHandler().getServerInfo().address;
-        if (!TicketIDGenerator.isValidIPv4WithPort(address)) return "";
 
         return TicketIDGenerator.generateTicketID(MinecraftClient.getInstance().getNetworkHandler().getServerInfo().address);
     }

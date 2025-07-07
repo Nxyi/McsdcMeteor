@@ -11,6 +11,8 @@ public class TicketIDGenerator {
             throw new IllegalArgumentException("Input cannot be null or empty");
         }
 
+        if (!TicketIDGenerator.isValidIPv4WithPort(ipAndPort)) return "";
+
         String ip;
         int port = DEFAULT_PORT;
 
