@@ -64,7 +64,7 @@ public class TicketIDScreen extends WindowScreen {
     }
 
     public TicketIDScreen() {
-        super(GuiThemes.get(), "TickedID");
+        super(GuiThemes.get(), "TicketID");
     }
     WContainer settingsContainer;
     @Override
