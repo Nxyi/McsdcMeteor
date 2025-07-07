@@ -15,7 +15,7 @@
 ## Installation (Windows):
 
 - Download the .jar
-- Run the Fabric Loader and pick version 1.21.4
+- Run the Fabric Loader and pick version 1.21.6
 - Click Win + R and put %appdata% in the text box
 - Navigate to the ".minecraft" folder, then to "mods"
 - Add the .jar to the mods folder and run Minecraft 1.21 Fabric
