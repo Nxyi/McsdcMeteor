@@ -55,6 +55,8 @@ public class McsdcScreen extends WindowScreen {
         WButton findPlayersButton = widgetList.add(this.theme.button("Search players")).expandX().widget();
         WButton recentServersButton = widgetList.add(this.theme.button("Recent Servers")).expandX().widget();
         WButton removeServersButton = widgetList.add(this.theme.button("Remove Servers")).expandX().widget();
+        WButton tickedIdScreenButton = widgetList.add(this.theme.button("TickedID search")).expandX().widget();
+
 
         newServersButton.action = () -> {
             this.client.setScreen(FindNewServersScreen.instance(this.multiplayerScreen, this));
@@ -78,6 +80,10 @@ public class McsdcScreen extends WindowScreen {
 
             MultiplayerScreenUtils.save(this.multiplayerScreen);
             MultiplayerScreenUtils.reload(this.multiplayerScreen);
+        };
+
+        tickedIdScreenButton.action = () -> {
+            this.client.setScreen(TicketIDScreen.instance(this.multiplayerScreen, this));
         };
 
 //        findPlayersButton.action = () -> {

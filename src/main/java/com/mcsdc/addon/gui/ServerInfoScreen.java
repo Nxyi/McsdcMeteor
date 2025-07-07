@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.system.McsdcSystem;
+import com.mcsdc.addon.util.TicketIDGenerator;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -52,8 +53,18 @@ public class ServerInfoScreen extends WindowScreen {
 
             return response.body();
         }).thenAccept(response -> {
+            if (response == null || response.isEmpty()){
+                add(theme.label("Not Valid"));
+                return;
+            }
+
             Main.mc.execute(() -> {
                 JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
+
+                if (jsonObject.has("error")){
+                    add(theme.label("Not Valid"));
+                    return;
+                }
 
                 WTable table = add(theme.table()).widget();
 
@@ -65,6 +76,16 @@ public class ServerInfoScreen extends WindowScreen {
                 );
                 table.add(theme.button("Copy")).widget().action = () -> {
                     Main.mc.keyboard.setClipboard(this.ip);
+                };
+
+                table.row();
+
+                String ticketID = TicketIDGenerator.generateTicketID(this.ip);
+                table.add(
+                    theme.label("ID: %s".formatted(ticketID))
+                );
+                table.add(theme.button("Copy")).widget().action = () -> {
+                    Main.mc.keyboard.setClipboard(ticketID);
                 };
 
                 table.row();
