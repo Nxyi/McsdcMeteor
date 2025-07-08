@@ -6,6 +6,7 @@ import com.mcsdc.addon.Main;
 import com.mcsdc.addon.gui.EditFlagsScreen;
 import com.mcsdc.addon.gui.ServerInfoScreen;
 import com.mcsdc.addon.system.McsdcSystem;
+import com.mcsdc.addon.util.TicketIDGenerator;
 import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
@@ -42,10 +43,6 @@ public abstract class GameMenuMixin extends Screen {
     private void oninitWidgets(CallbackInfo ci, GridWidget gridWidget, GridWidget.Adder adder){
         ServerInfo info = Main.mc.getNetworkHandler().getServerInfo();
 
-        adder.add(ButtonWidget.builder(Text.literal("Info"), (button) -> {
-            Main.mc.setScreen(new ServerInfoScreen(info.address));
-        }).width(204).build(), 2);
-
         adder.add(ButtonWidget.builder(Text.literal("Reconnect"), (button) -> {
             Main.mc.world.disconnect(Text.of(""));
             ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
@@ -53,10 +50,16 @@ public abstract class GameMenuMixin extends Screen {
 
         }).width(204).build(), 2);
 
-        adder.add(ButtonWidget.builder(Text.literal("Edit Flags"), (button) -> {
-            Main.mc.setScreen(new EditFlagsScreen(info.address));
-        }).width(204).build(), 2);
 
+        if (TicketIDGenerator.isValidIPv4WithPort(info.address)){
+            adder.add(ButtonWidget.builder(Text.literal("Info"), (button) -> {
+                Main.mc.setScreen(new ServerInfoScreen(info.address));
+            }).width(204).build(), 2);
+
+            adder.add(ButtonWidget.builder(Text.literal("Edit Flags"), (button) -> {
+                Main.mc.setScreen(new EditFlagsScreen(info.address));
+            }).width(204).build(), 2);
+        }
     }
 
 
