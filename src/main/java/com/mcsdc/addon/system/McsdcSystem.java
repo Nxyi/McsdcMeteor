@@ -15,6 +15,7 @@ public class McsdcSystem extends System<McsdcSystem> {
     private String token = "";
     private String username = "";
     private int level = -1;
+    private String lastServer = "";
 
     private List<ServerStorage> recentServers = new ArrayList<>();
 
@@ -61,6 +62,14 @@ public class McsdcSystem extends System<McsdcSystem> {
             }
         }
         return null;
+    }
+
+    public String getLastServer() {
+        return lastServer;
+    }
+
+    public void setLastServer(String lastServer) {
+        this.lastServer = lastServer;
     }
 
     @Override
