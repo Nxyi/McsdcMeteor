@@ -161,8 +161,6 @@ public class EditFlagsScreen extends WindowScreen {
         innerJson.addProperty("joined", true);
         mainJson.add("update", innerJson);
 
-        Main.LOG.info(mainJson.toString());
-
         Http.post(Main.mainEndpoint).bodyJson(mainJson).header(
                 "authorization",
                 "Bearer " + McsdcSystem.get().getToken()
