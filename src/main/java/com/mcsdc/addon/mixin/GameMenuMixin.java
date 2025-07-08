@@ -1,25 +1,38 @@
 package com.mcsdc.addon.mixin;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
+import com.mcsdc.addon.gui.EditFlagsScreen;
 import com.mcsdc.addon.gui.ServerInfoScreen;
+import com.mcsdc.addon.system.McsdcSystem;
+import meteordevelopment.meteorclient.utils.network.Http;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.screen.advancement.AdvancementsScreen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.CheckboxWidget;
 import net.minecraft.client.gui.widget.GridWidget;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.net.http.HttpResponse;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+
 @Mixin(GameMenuScreen.class)
-public class GameMenuMixin extends Screen {
+public abstract class GameMenuMixin extends Screen {
 
     protected GameMenuMixin(Text title) {
         super(title);
@@ -39,6 +52,12 @@ public class GameMenuMixin extends Screen {
                 ServerAddress.parse(info.address), info, false, null);
 
         }).width(204).build(), 2);
+
+        adder.add(ButtonWidget.builder(Text.literal("Edit Flags"), (button) -> {
+            Main.mc.setScreen(new EditFlagsScreen(info.address));
+        }).width(204).build(), 2);
+
     }
+
 
 }

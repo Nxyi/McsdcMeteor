@@ -15,6 +15,7 @@ public class McsdcSystem extends System<McsdcSystem> {
     private String token = "";
     private String username = "";
     private int level = -1;
+
     private List<ServerStorage> recentServers = new ArrayList<>();
 
     public McsdcSystem() {

@@ -6,12 +6,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.system.McsdcSystem;
+import com.mcsdc.addon.system.ServerStorage;
 import com.mcsdc.addon.util.TicketIDGenerator;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.utils.network.Http;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -102,6 +109,11 @@ public class ServerInfoScreen extends WindowScreen {
                     table.row();
                 }
 
+                table.add(theme.button("Edit Flags")).expandX().widget().action = () -> {
+                    MinecraftClient.getInstance().setScreen(new EditFlagsScreen(this.ip));
+                };
+                table.row();
+
                 table.add(theme.horizontalSeparator("Status")).expandX().widget();
                 table.row();
 
@@ -136,14 +148,6 @@ public class ServerInfoScreen extends WindowScreen {
                     )
                 );
                 table.row();
-
-//            String notes = jsonObject.get("notes").getAsString();
-//            Main.LOG.info(notes);
-//            if (notes != null && !notes.isEmpty()){
-//                table.add(
-//                    theme.label("notes: %s".formatted(notes))
-//                );
-//            }
 
                 table.add(theme.horizontalSeparator("Scanned")).expandX().widget();
                 table.row();
