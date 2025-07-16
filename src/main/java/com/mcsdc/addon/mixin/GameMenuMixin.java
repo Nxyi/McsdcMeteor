@@ -44,7 +44,7 @@ public abstract class GameMenuMixin extends Screen {
         ServerInfo info = Main.mc.getNetworkHandler().getServerInfo();
 
         adder.add(ButtonWidget.builder(Text.literal("Reconnect"), (button) -> {
-            Main.mc.world.disconnect(Text.of(""));
+            Main.mc.world.disconnect();
             ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
                 ServerAddress.parse(info.address), info, false, null);
 

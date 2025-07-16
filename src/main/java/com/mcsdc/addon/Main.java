@@ -7,8 +7,8 @@ import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
+import meteordevelopment.starscript.value.Value;
 import net.minecraft.client.MinecraftClient;
-import org.meteordev.starscript.value.Value;
 import org.slf4j.Logger;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;

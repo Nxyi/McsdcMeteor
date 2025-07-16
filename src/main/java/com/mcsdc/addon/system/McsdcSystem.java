@@ -96,15 +96,15 @@ public class McsdcSystem extends System<McsdcSystem> {
 
     @Override
     public McsdcSystem fromTag(NbtCompound tag) {
-        this.token = tag.getString("token").get();
-        this.username = tag.getString("username").get();
-        this.level = tag.getInt("level").get();
+        this.token = tag.getString("token");
+        this.username = tag.getString("username");
+        this.level = tag.getInt("level");
 
-        NbtList list = tag.getList("recent").get();
+        NbtList list = tag.getList("recent", 9);
         for (NbtElement element : list){
             NbtCompound compound = (NbtCompound) element;
-            String ip = compound.getString("ip").get();
-            String ver = compound.getString("version").get();
+            String ip = compound.getString("ip");
+            String ver = compound.getString("version");
 
             recentServers.add(new ServerStorage(ip, ver, null, null));
         }

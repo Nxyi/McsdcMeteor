@@ -209,7 +209,7 @@ public class ServerInfoScreen extends WindowScreen {
                                 new CrackedAccount(info.name).login();
 
                                 ServerInfo serverInfo = Main.mc.getNetworkHandler().getServerInfo();
-                                Main.mc.world.disconnect(Text.of(""));
+                                Main.mc.world.disconnect();
                                 ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
                                     ServerAddress.parse(serverInfo.address), serverInfo, false, null);
                             };
