@@ -1,10 +1,10 @@
 plugins {
-    id("fabric-loom") version "1.10-SNAPSHOT"
+    id("fabric-loom") version "1.11-SNAPSHOT"
 }
 
 base {
     archivesName = properties["archives_base_name"] as String
-    version = properties["mod_version"] as String
+    version = properties["mod_version"] as String + "-" + properties["minecraft_version"] as String
     group = properties["maven_group"] as String
 }
 
