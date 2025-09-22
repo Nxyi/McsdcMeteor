@@ -18,6 +18,7 @@ public class ClientPlayNetworkHandlerMixin {
     private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo ci) {
         McsdcSystem system = McsdcSystem.get();
         ServerInfo info = MeteorClient.mc.getNetworkHandler().getServerInfo();
+        if(info == null) return;
         ServerStorage server = system.getRecentServerWithIp(info.address);
 
         if (system.getRecentServers().contains(server)){
