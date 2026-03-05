@@ -1,0 +1,48 @@
+name: Release
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Set up JDK 21
+              uses: actions/setup-java@v4
+              with:
+                  java-version: "21"
+                  distribution: "temurin"
+            - name: Get mod_version from gradle.properties
+              id: getModVersion
+              run: |
+                  MOD_VERSION=$(grep "^mod_version=" gradle.properties | cut -d'=' -f2)
+                  echo "mod_version=$MOD_VERSION" >> $GITHUB_OUTPUT
+            - name: Get minecraft_version from gradle.properties
+              id: getMinecraftVersion
+              run: |
+                  MINECRAFT_VERSION=$(grep "^minecraft_version=" gradle.properties | cut -d'=' -f2)
+                  echo "minecraft_version=$MINECRAFT_VERSION" >> $GITHUB_OUTPUT
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v4
+
+            - name: Grant execute permission for gradlew
+              run: chmod -R +x .
+
+            - name: Build with Gradle
+              run: ./gradlew build
+
+            - name: Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ github.run_id }}
+                  name: Release Mcsdc v${{steps.getModVersion.outputs.mod_version}}+${{github.sha}}
+                  files: |
+                      build/libs/Mcsdc-${{steps.getModVersion.outputs.mod_version}}-${{steps.getMinecraftVersion.outputs.minecraft_version}}.jar
