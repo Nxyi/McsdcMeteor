@@ -1,26 +1,17 @@
 package com.mcsdc.addon.system;
 
 public enum MOTD {
-    DEFAULT("default", null),
-    COMMUNITY("community", null),
-    CREATIVE("creative", null),
-    BIGOTRY("bigotry", null),
-    FURRY("furry", null),
-    LGBT("lgbt", null);
+    DEFAULT("default"),
+    COMMUNITY("community"),
+    CREATIVE("creative"),
+    BIGOTRY("bigotry"),
+    FURRY("furry"),
+    LGBT("lgbt");
 
-    String name;
-    Boolean search;
-    MOTD(String name, Boolean search){
+    private final String name;
+
+    MOTD(String name) {
         this.name = name;
-        this.search = search;
-    }
-
-    public void setSearch(Boolean search) {
-        this.search = search;
-    }
-
-    public Boolean shouldSearch(){
-        return this.search;
     }
 
     public String getName() {

@@ -1,8 +1,6 @@
 package com.mcsdc.addon.gui;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.MultiplayerScreenUtils;
 import com.mcsdc.addon.system.MOTD;
@@ -26,6 +24,8 @@ import net.minecraft.client.network.ServerInfo;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FindNewServersScreen extends WindowScreen {
     private static FindNewServersScreen instance = null;
@@ -114,10 +114,8 @@ public class FindNewServersScreen extends WindowScreen {
         .onChanged((v) -> {
             reload();
             if (extractedServers != null && !extractedServers.isEmpty()){
-                bruh();
+                displaySearchResults();
             }
-
-
         })
         .build()
     );
@@ -177,10 +175,8 @@ public class FindNewServersScreen extends WindowScreen {
         .onChanged((v) -> {
             reload();
             if (extractedServers != null && !extractedServers.isEmpty()){
-                bruh();
+                displaySearchResults();
             }
-
-
         })
         .build()
     );
@@ -216,6 +212,7 @@ public class FindNewServersScreen extends WindowScreen {
         if (instance == null) {
             instance = new FindNewServersScreen();
         }
+        instance.extractedServers = null;
         instance.setMultiplayerScreen(multiplayerScreen);
         instance.setParent(parent);
         return instance;
@@ -251,7 +248,7 @@ public class FindNewServersScreen extends WindowScreen {
 
             CompletableFuture.supplyAsync(() -> {
                 searching = true;
-                add(theme.label("Searching...")).expandX().widget();
+                mc.execute(() -> add(theme.label("Searching...")).expandX().widget());
 
                 Object ver;
                 if (!advancedVersionSetting.get()){
@@ -260,11 +257,11 @@ public class FindNewServersScreen extends WindowScreen {
                     boolean isVanilla = vanilla.get();
 
                     if (isVanilla && number != -1) {
-                        ver = versionEnumSetting.get().version; // Use the string version
+                        ver = versionEnumSetting.get().version;
                     } else if (number != -1) {
-                        ver = number; // Use protocol number if valid
+                        ver = number;
                     } else {
-                        ver = null; // Set to null only if explicitly invalid
+                        ver = null;
                     }
                 } else {
                     if (versionStringSetting.get().isEmpty()){
@@ -284,10 +281,6 @@ public class FindNewServersScreen extends WindowScreen {
                     motds.put(MOTD.BIGOTRY, BIGOTRY.get().bool);
                     motds.put(MOTD.FURRY, FURRY.get().bool);
                     motds.put(MOTD.LGBT, LGBT.get().bool);
-
-                    for (MOTD motd : MOTD.values()) {
-                        motd.setSearch(motds.get(motd));
-                    }
                 }
 
                 ServerSearchBuilder.Extra extra = new ServerSearchBuilder.Extra(hasHistory.get().bool, hasNotes.get().bool, motds);
@@ -299,26 +292,37 @@ public class FindNewServersScreen extends WindowScreen {
 
                 return Http.post(Main.mainEndpoint).bodyString(jsonString.toString()).header("authorization", "Bearer " + McsdcSystem.get().getToken()).sendString();
             }).thenAccept(response -> {
-                Main.mc.execute(() -> {
+                mc.execute(() -> {
                     searching = false;
                     reload();
 
-                    // some janky shit because it complains
-                    String res = response;
-                    if (response.endsWith(",]")){ // depending on the search, response can be slightly malformed.
-                        res = response.substring(0, response.length() - 2) + "]";
+                    if (response == null) {
+                        add(theme.label("No servers found.")).expandX().widget();
+                        return;
                     }
 
-                    extractedServers = extractServerInfo(res);
+                    String res = response;
+                    if (res.endsWith(",]")){
+                        res = res.substring(0, res.length() - 2) + "]";
+                    }
+
+                    try {
+                        extractedServers = ServerStorage.fromJsonArray(res);
+                    } catch (Exception e) {
+                        add(theme.label("Error parsing response.")).expandX().widget();
+                        return;
+                    }
+
                     if (hideOfflineSetting.get()){
                         extractedServers.removeIf(server -> server.lastScanned() - server.lastSeen() > 40 * 60 * 1000);
                     }
 
-                    if (response == null || extractedServers.isEmpty()){
+                    if (extractedServers.isEmpty()){
                         add(theme.label("No servers found.")).expandX().widget();
                         return;
                     }
-                    bruh();
+                    McsdcSystem.get().setServerQueue(extractedServers);
+                    displaySearchResults();
 
                 });
 
@@ -326,7 +330,7 @@ public class FindNewServersScreen extends WindowScreen {
         };
     }
 
-    public void bruh(){
+    public void displaySearchResults(){
         WHorizontalList buttons = add(theme.horizontalList()).expandX().widget();
 
         buttons.add(theme.button("add all")).expandX().widget().action = () -> {
@@ -342,14 +346,14 @@ public class FindNewServersScreen extends WindowScreen {
             reload();
 
             Collections.shuffle(extractedServers);
-            bruh();
+            displaySearchResults();
         };
 
         generateWidgets(extractedServers);
     }
 
     public void generateWidgets(List<ServerStorage> extractedServers){
-        Main.mc.execute(() -> {
+        mc.execute(() -> {
             WTable table = add(theme.table()).widget();
             table.clear();
 
@@ -359,7 +363,6 @@ public class FindNewServersScreen extends WindowScreen {
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
 
-            // Iterate through the extracted server data
             extractedServers.forEach((server) -> {
                 String serverIP = server.ip();
                 String serverVersion = server.version();
@@ -378,12 +381,12 @@ public class FindNewServersScreen extends WindowScreen {
 
                 WButton joinServerButton = theme.button("Join Server");
                 joinServerButton.action = () ->
-                    ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
+                    ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
                         ServerAddress.parse(serverIP), new ServerInfo("", serverIP, ServerInfo.ServerType.OTHER), false, null);
 
                 WButton serverInfoButton = theme.button("Server Info");
                 serverInfoButton.action = () -> {
-                    Main.mc.setScreen(new ServerInfoScreen(serverIP));
+                    mc.setScreen(new ServerInfoScreen(serverIP));
                 };
 
                 table.add(addServerButton);
@@ -392,21 +395,6 @@ public class FindNewServersScreen extends WindowScreen {
                 table.row();
             });
         });
-    }
-
-    public static List<ServerStorage> extractServerInfo(String jsonResponse) {
-        List<ServerStorage> serverStorageList = new ArrayList<>();
-        JsonArray jsonObject = JsonParser.parseString(jsonResponse).getAsJsonArray();
-
-        jsonObject.forEach(node -> {
-            String address = node.getAsJsonObject().get("address").getAsString();
-            String version = node.getAsJsonObject().get("version").getAsString();
-            long lastscanned = node.getAsJsonObject().get("last_scanned").getAsLong();
-            long lastseen = node.getAsJsonObject().get("last_seen_online").getAsLong();
-            serverStorageList.add(new ServerStorage(address, version, lastscanned, lastseen));
-        });
-
-        return serverStorageList;
     }
 
     public enum Flags{

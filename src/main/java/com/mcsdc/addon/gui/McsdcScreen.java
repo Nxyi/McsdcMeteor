@@ -12,6 +12,8 @@ import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 
 import java.util.concurrent.CompletableFuture;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 
 public class McsdcScreen extends WindowScreen {
     private final MultiplayerScreen multiplayerScreen;
@@ -34,8 +36,8 @@ public class McsdcScreen extends WindowScreen {
         CompletableFuture.supplyAsync(() -> {
             return Http.post("https://interact.mcsdc.online/notice.txt").sendString();
         }).thenAccept(notice -> {
-            noticeTable.add(theme.label(notice == null ? "No notice" : notice));
-        }); // fix freezing that can happen when opening screen, no longer waits for notice before adding other components
+            mc.execute(() -> noticeTable.add(theme.label(notice == null ? "No notice" : notice)));
+        });
 
         WTable accountList = add(theme.table()).expandX().widget();
         accountList.row();
@@ -85,11 +87,6 @@ public class McsdcScreen extends WindowScreen {
         tickedIdScreenButton.action = () -> {
             this.client.setScreen(TicketIDScreen.instance(this.multiplayerScreen, this));
         };
-
-//        findPlayersButton.action = () -> {
-//            if (this.client == null) return;
-//            this.client.setScreen(new FindPlayerScreen(this.multiplayerScreen));
-//        };
     }
 
     @Override

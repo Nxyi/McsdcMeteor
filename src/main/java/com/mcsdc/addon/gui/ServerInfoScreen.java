@@ -6,19 +6,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.system.McsdcSystem;
-import com.mcsdc.addon.system.ServerStorage;
 import com.mcsdc.addon.util.TicketIDGenerator;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -33,6 +26,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class ServerInfoScreen extends WindowScreen {
 
     private final String ip;
@@ -45,30 +40,30 @@ public class ServerInfoScreen extends WindowScreen {
     @Override
     public void initWidgets() {
         CompletableFuture.supplyAsync(() -> {
-            String string =
-                "{\"search\":{\"address\":\"%s\"}}".formatted(this.ip);
+            JsonObject searchJson = new JsonObject();
+            JsonObject addressJson = new JsonObject();
+            addressJson.addProperty("address", this.ip);
+            searchJson.add("search", addressJson);
 
             HttpResponse<String> response = Http.post(
-                Main.mainEndpoint
-            )
-                .bodyString(string)
-                .header(
-                    "authorization",
-                    "Bearer " + McsdcSystem.get().getToken()
-                )
-                .sendStringResponse();
+                    Main.mainEndpoint)
+                    .bodyJson(searchJson)
+                    .header(
+                            "authorization",
+                            "Bearer " + McsdcSystem.get().getToken())
+                    .sendStringResponse();
 
-            return response.body();
+            return response != null ? response.body() : null;
         }).thenAccept(response -> {
-            if (response == null || response.isEmpty()){
-                add(theme.label("Not Valid"));
+            if (response == null || response.isEmpty()) {
+                mc.execute(() -> add(theme.label("Not Valid")));
                 return;
             }
 
-            Main.mc.execute(() -> {
+            mc.execute(() -> {
                 JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
 
-                if (jsonObject.has("error")){
+                if (jsonObject.has("error")) {
                     add(theme.label("Not Valid"));
                     return;
                 }
@@ -79,38 +74,34 @@ public class ServerInfoScreen extends WindowScreen {
                 table.row();
 
                 table.add(
-                    theme.label("Ip: %s".formatted(this.ip))
-                );
+                        theme.label("Ip: %s".formatted(this.ip)));
                 table.add(theme.button("Copy")).widget().action = () -> {
-                    Main.mc.keyboard.setClipboard(this.ip);
+                    mc.keyboard.setClipboard(this.ip);
                 };
 
                 table.row();
 
                 String ticketID = TicketIDGenerator.generateTicketID(this.ip);
                 table.add(
-                    theme.label("ID: %s".formatted(ticketID))
-                );
+                        theme.label("ID: %s".formatted(ticketID)));
                 table.add(theme.button("Copy")).widget().action = () -> {
-                    Main.mc.keyboard.setClipboard(ticketID);
+                    mc.keyboard.setClipboard(ticketID);
                 };
 
                 table.row();
 
                 table.add(
-                    theme.label("version: %s".formatted(jsonObject.get("version").getAsString()))
-                );
+                        theme.label("version: %s".formatted(jsonObject.get("version").getAsString())));
                 table.row();
 
-                if (jsonObject.has("notes")){
+                if (jsonObject.has("notes")) {
                     table.add(
-                        theme.label("Notes: %s".formatted(jsonObject.get("notes").getAsString().strip()))
-                    );
+                            theme.label("Notes: %s".formatted(jsonObject.get("notes").getAsString().strip())));
                     table.row();
                 }
 
                 table.add(theme.button("Edit Flags")).expandX().widget().action = () -> {
-                    MinecraftClient.getInstance().setScreen(new EditFlagsScreen(this.ip));
+                    mc.setScreen(new EditFlagsScreen(this.ip));
                 };
                 table.row();
 
@@ -118,35 +109,32 @@ public class ServerInfoScreen extends WindowScreen {
                 table.row();
 
                 table.add(
-                    theme.label("visited: %s".formatted(jsonObject.get("status").getAsJsonObject().get("visited").getAsString()))
-                );
+                        theme.label("visited: %s"
+                                .formatted(jsonObject.get("status").getAsJsonObject().get("visited").getAsString())));
                 table.row();
                 table.add(
-                    theme.label("griefed: %s".formatted(jsonObject.get("status").getAsJsonObject().get("griefed").getAsString()))
-                );
+                        theme.label("griefed: %s"
+                                .formatted(jsonObject.get("status").getAsJsonObject().get("griefed").getAsString())));
                 table.row();
                 table.add(
-                    theme.label("modded: %s".formatted(jsonObject.get("status").getAsJsonObject().get("modded").getAsString()))
-                );
+                        theme.label("modded: %s"
+                                .formatted(jsonObject.get("status").getAsJsonObject().get("modded").getAsString())));
                 table.row();
                 table.add(
-                    theme.label("whitelist: %s".formatted(jsonObject.get("status").getAsJsonObject().get("whitelist").getAsString()))
-                );
+                        theme.label("whitelist: %s"
+                                .formatted(jsonObject.get("status").getAsJsonObject().get("whitelist").getAsString())));
                 table.row();
                 table.add(
-                    theme.label("banned: %s".formatted(jsonObject.get("status").getAsJsonObject().get("banned").getAsString()))
-                );
+                        theme.label("banned: %s"
+                                .formatted(jsonObject.get("status").getAsJsonObject().get("banned").getAsString())));
                 table.row();
                 table.add(
-                    theme.label(
-                        "save for later: %s".formatted(
-                            jsonObject
-                                .get("status").getAsJsonObject()
-                                .get("save_for_later")
-                                .getAsString()
-                        )
-                    )
-                );
+                        theme.label(
+                                "save for later: %s".formatted(
+                                        jsonObject
+                                                .get("status").getAsJsonObject()
+                                                .get("save_for_later")
+                                                .getAsString())));
                 table.row();
 
                 table.add(theme.horizontalSeparator("Scanned")).expandX().widget();
@@ -154,15 +142,14 @@ public class ServerInfoScreen extends WindowScreen {
 
                 table.row();
                 table.add(
-                    theme.label("last seen online: %s".formatted(timeAgo(jsonObject.get("last_seen_online").getAsLong())))
-                );
+                        theme.label("last seen online: %s"
+                                .formatted(timeAgo(jsonObject.get("last_seen_online").getAsLong()))));
                 table.row();
                 table.add(
-                    theme.label("last scanned: %s".formatted(timeAgo(jsonObject.get("last_scanned").getAsLong())))
-                );
+                        theme.label("last scanned: %s".formatted(timeAgo(jsonObject.get("last_scanned").getAsLong()))));
                 table.row();
                 table.add(
-                    theme.label("last joined: %s".formatted(timeAgo(jsonObject.get("last_joined").getAsLong()))));
+                        theme.label("last joined: %s".formatted(timeAgo(jsonObject.get("last_joined").getAsLong()))));
                 table.row();
 
                 WTable accounts = add(theme.table()).expandX().widget();
@@ -171,24 +158,25 @@ public class ServerInfoScreen extends WindowScreen {
 
                 JsonArray array = JsonParser.parseString(response).getAsJsonObject().getAsJsonArray("historical");
                 List<PlayerInfo> players = new ArrayList<>();
-                for (JsonElement jsonElement : array){
+                for (JsonElement jsonElement : array) {
                     String name;
-                    try { // some weird response can send the name as a JsonArray. so if thats the case, im just gonna skip it.
+                    try {
                         name = jsonElement.getAsJsonObject().get("name").getAsString();
-                    } catch (Exception exception){
+                    } catch (Exception exception) {
                         continue;
                     }
 
                     String uuid = jsonElement.getAsJsonObject().get("uuid").getAsString();
 
-                    if (uuid.endsWith("0000-000000000000")) { // depending on stuff, uuid can start with "????" so, checking for the end is good enough. as no real uuid should end with that
+                    if (uuid.endsWith("0000-000000000000")) {
                         continue;
                     }
 
                     players.add(new PlayerInfo(name, uuid));
                 }
 
-                if (players.isEmpty()) accounts.add(theme.label("No historical players found."));
+                if (players.isEmpty())
+                    accounts.add(theme.label("No historical players found."));
                 else {
                     for (PlayerInfo info : players) {
                         accounts.add(theme.label(info.name)).expandX().widget();
@@ -196,26 +184,27 @@ public class ServerInfoScreen extends WindowScreen {
                             new CrackedAccount(info.name).login();
                         };
 
-                        if (Main.mc.world == null) {
+                        if (mc.world == null) {
                             accounts.add(theme.button("Login & join")).expandX().widget().action = () -> {
                                 new CrackedAccount(info.name).login();
 
                                 ServerInfo serverInfo = new ServerInfo("Mcsdc " + this.ip, this.ip, ServerType.OTHER);
-                                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
-                                    ServerAddress.parse(serverInfo.address), serverInfo, false, null);
+                                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
+                                        ServerAddress.parse(serverInfo.address), serverInfo, false, null);
                             };
                         } else {
                             accounts.add(theme.button("Login & rejoin")).expandX().widget().action = () -> {
                                 new CrackedAccount(info.name).login();
 
-                                ServerInfo serverInfo = Main.mc.getNetworkHandler().getServerInfo();
-                                Main.mc.world.disconnect(Text.of(""));
-                                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
-                                    ServerAddress.parse(serverInfo.address), serverInfo, false, null);
+                                ServerInfo serverInfo = mc.getNetworkHandler().getServerInfo();
+                                mc.world.disconnect(Text.of(""));
+                                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
+                                        ServerAddress.parse(serverInfo.address), serverInfo, false, null);
                             };
                         }
 
-                        if (players.getLast() != info) accounts.row();
+                        if (players.getLast() != info)
+                            accounts.row();
                     }
                 }
             });
@@ -223,13 +212,14 @@ public class ServerInfoScreen extends WindowScreen {
     }
 
     public static String timeAgo(long timestampMillis) {
-        if (timestampMillis == 0) return "never";
+        if (timestampMillis == 0)
+            return "never";
 
         long currentMillis = System.currentTimeMillis();
         long diffMillis = currentMillis - timestampMillis;
 
         if (diffMillis < 0) {
-            return "In the future"; // Handles cases where timestamp is in the future
+            return "In the future";
         }
 
         long seconds = TimeUnit.MILLISECONDS.toSeconds(diffMillis);
@@ -246,5 +236,6 @@ public class ServerInfoScreen extends WindowScreen {
         return hours + " hours ago";
     }
 
-    public record PlayerInfo(String name, String uuid){}
+    public record PlayerInfo(String name, String uuid) {
+    }
 }

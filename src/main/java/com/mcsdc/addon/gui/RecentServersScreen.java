@@ -1,6 +1,5 @@
 package com.mcsdc.addon.gui;
 
-import com.mcsdc.addon.Main;
 import com.mcsdc.addon.MultiplayerScreenUtils;
 import com.mcsdc.addon.system.McsdcSystem;
 import com.mcsdc.addon.system.ServerStorage;
@@ -15,6 +14,8 @@ import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 
 import java.util.List;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RecentServersScreen extends WindowScreen {
     MultiplayerScreen multiplayerScreen;
@@ -34,7 +35,7 @@ public class RecentServersScreen extends WindowScreen {
         }
 
         table.add(theme.button("Clear")).expandX().widget().action = () -> {
-            McsdcSystem.get().getRecentServers().clear();
+            McsdcSystem.get().clearRecentServers();
             reload();
         };
 
@@ -45,7 +46,6 @@ public class RecentServersScreen extends WindowScreen {
         table.row();
         table.add(theme.horizontalSeparator()).expandX();
 
-        // Reverse list so most recent shows at the top
         List<ServerStorage> reversed = McsdcSystem.get().getRecentServers().reversed();
 
         reversed.forEach((serverStorage) -> {
@@ -67,19 +67,17 @@ public class RecentServersScreen extends WindowScreen {
 
             WButton joinServerButton = theme.button("Join Server");
             joinServerButton.action = () -> {
-                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
+                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
                     ServerAddress.parse(serverIP), new ServerInfo("", serverIP, ServerInfo.ServerType.OTHER), false, null);
-
-
             };
             WButton serverInfoButton = theme.button("Server Info");
             serverInfoButton.action = () -> {
-                Main.mc.setScreen(new ServerInfoScreen(serverIP));
+                mc.setScreen(new ServerInfoScreen(serverIP));
             };
 
             WButton removeServerButton = theme.button("Remove Server");
             removeServerButton.action = () -> {
-                McsdcSystem.get().getRecentServers().remove(serverStorage);
+                McsdcSystem.get().removeRecentServer(serverStorage);
                 reload();
             };
 

@@ -7,17 +7,20 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 
 public class McsdcSystem extends System<McsdcSystem> {
+    public static final int MAX_RECENT_SERVERS = 100;
+
     private String token = "";
     private String username = "";
     private int level = -1;
     private String lastServer = "";
+    private final List<ServerStorage> serverQueue = new ArrayList<>();
+    private int currentServerIndex = 0;
 
-    private List<ServerStorage> recentServers = new ArrayList<>();
+    private final LinkedHashMap<String, ServerStorage> recentServers = new LinkedHashMap<>();
 
     public McsdcSystem() {
         super("McsdcSystem");
@@ -52,16 +55,29 @@ public class McsdcSystem extends System<McsdcSystem> {
     }
 
     public List<ServerStorage> getRecentServers() {
-        return recentServers;
+        return new ArrayList<>(recentServers.values());
     }
 
-    public ServerStorage getRecentServerWithIp(String ip){
-        for (ServerStorage server : recentServers){
-            if (Objects.equals(server.ip(), ip)){
-                return server;
-            }
+    public ServerStorage getRecentServerWithIp(String ip) {
+        return recentServers.get(ip);
+    }
+
+    public void addRecentServer(ServerStorage server) {
+        recentServers.remove(server.ip());
+        recentServers.put(server.ip(), server);
+
+        while (recentServers.size() > MAX_RECENT_SERVERS) {
+            String oldestKey = recentServers.keySet().iterator().next();
+            recentServers.remove(oldestKey);
         }
-        return null;
+    }
+
+    public void removeRecentServer(ServerStorage server) {
+        recentServers.remove(server.ip());
+    }
+
+    public void clearRecentServers() {
+        recentServers.clear();
     }
 
     public String getLastServer() {
@@ -70,6 +86,33 @@ public class McsdcSystem extends System<McsdcSystem> {
 
     public void setLastServer(String lastServer) {
         this.lastServer = lastServer;
+    }
+
+    public void setServerQueue(List<ServerStorage> servers) {
+        serverQueue.clear();
+        serverQueue.addAll(servers);
+        currentServerIndex = 0;
+    }
+
+    public ServerStorage getNextServer() {
+        if (!hasServerQueue()) return null;
+
+        while (currentServerIndex < serverQueue.size()) {
+            ServerStorage server = serverQueue.get(currentServerIndex++);
+            if (!server.ip().equals(lastServer)) return server;
+        }
+
+        clearServerQueue();
+        return null;
+    }
+
+    public boolean hasServerQueue() {
+        return !serverQueue.isEmpty() && currentServerIndex < serverQueue.size();
+    }
+
+    public void clearServerQueue() {
+        serverQueue.clear();
+        currentServerIndex = 0;
     }
 
     @Override
@@ -81,7 +124,7 @@ public class McsdcSystem extends System<McsdcSystem> {
 
         NbtList list = new NbtList();
 
-        recentServers.forEach((server) -> {
+        recentServers.values().forEach((server) -> {
             NbtCompound compound2 = new NbtCompound();
             compound2.putString("ip", server.ip());
             compound2.putString("version", server.version());
@@ -90,6 +133,17 @@ public class McsdcSystem extends System<McsdcSystem> {
 
         compound.put("recent", list);
 
+        NbtList queueList = new NbtList();
+        serverQueue.forEach((server) -> {
+            NbtCompound queueEntry = new NbtCompound();
+            queueEntry.putString("ip", server.ip());
+            queueEntry.putString("version", server.version());
+            if (server.lastScanned() != null) queueEntry.putLong("lastScanned", server.lastScanned());
+            if (server.lastSeen() != null) queueEntry.putLong("lastSeen", server.lastSeen());
+            queueList.add(queueEntry);
+        });
+        compound.put("serverQueue", queueList);
+        compound.putInt("currentServerIndex", this.currentServerIndex);
 
         return compound;
     }
@@ -101,16 +155,36 @@ public class McsdcSystem extends System<McsdcSystem> {
         this.level = tag.getInt("level").get();
 
         NbtList list = tag.getList("recent").get();
-        for (NbtElement element : list){
+        List<ServerStorage> tempList = new ArrayList<>();
+        for (NbtElement element : list) {
             NbtCompound compound = (NbtCompound) element;
             String ip = compound.getString("ip").get();
             String ver = compound.getString("version").get();
-
-            recentServers.add(new ServerStorage(ip, ver, null, null));
+            tempList.add(new ServerStorage(ip, ver, null, null));
         }
 
-        // reverse servers to ensure they are in the correct order. or they would flip each time.
-        Collections.reverse(recentServers);
+        for (int i = tempList.size() - 1; i >= 0; i--) {
+            ServerStorage s = tempList.get(i);
+            recentServers.put(s.ip(), s);
+        }
+
+        serverQueue.clear();
+        if (tag.getList("serverQueue").isPresent()) {
+            NbtList queueList = tag.getList("serverQueue").get();
+            for (NbtElement element : queueList) {
+                NbtCompound queueEntry = (NbtCompound) element;
+                String ip = queueEntry.getString("ip").get();
+                String version = queueEntry.getString("version").get();
+                Long lastScanned = queueEntry.getLong("lastScanned").orElse(null);
+                Long lastSeen = queueEntry.getLong("lastSeen").orElse(null);
+                serverQueue.add(new ServerStorage(ip, version, lastScanned, lastSeen));
+            }
+        }
+
+        this.currentServerIndex = tag.getInt("currentServerIndex").orElse(0);
+        if (this.currentServerIndex < 0 || this.currentServerIndex > serverQueue.size()) {
+            this.currentServerIndex = 0;
+        }
 
         return super.fromTag(tag);
     }
