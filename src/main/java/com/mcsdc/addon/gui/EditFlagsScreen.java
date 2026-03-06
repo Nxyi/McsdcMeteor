@@ -1,32 +1,19 @@
 package com.mcsdc.addon.gui;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.system.McsdcSystem;
-import com.mcsdc.addon.util.TicketIDGenerator;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.network.ServerInfo.ServerType;
-import net.minecraft.text.Text;
 
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EditFlagsScreen extends WindowScreen {
 
@@ -92,27 +79,29 @@ public class EditFlagsScreen extends WindowScreen {
     @Override
     public void initWidgets() {
         CompletableFuture.supplyAsync(() -> {
-            String string =
-                "{\"search\":{\"address\":\"%s\"}}".formatted(this.ip);
+            JsonObject searchJson = new JsonObject();
+            JsonObject addressJson = new JsonObject();
+            addressJson.addProperty("address", this.ip);
+            searchJson.add("search", addressJson);
 
             HttpResponse<String> response = Http.post(
                 Main.mainEndpoint
             )
-                .bodyString(string)
+                .bodyJson(searchJson)
                 .header(
                     "authorization",
                     "Bearer " + McsdcSystem.get().getToken()
                 )
                 .sendStringResponse();
 
-            return response.body();
+            return response != null ? response.body() : null;
         }).thenAccept(response -> {
             if (response == null || response.isEmpty()){
-                add(theme.label("Not Valid"));
+                mc.execute(() -> add(theme.label("Not Valid")));
                 return;
             }
 
-            Main.mc.execute(() -> {
+            mc.execute(() -> {
                 JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
 
                 if (jsonObject.has("error")) {
@@ -141,7 +130,6 @@ public class EditFlagsScreen extends WindowScreen {
     }
 
     public void setMarked(){
-        String ip = this.ip;
         JsonObject mainJson = new JsonObject();
         JsonObject innerJson = new JsonObject();
         JsonObject flagJson = new JsonObject();
@@ -153,18 +141,18 @@ public class EditFlagsScreen extends WindowScreen {
         flagJson.addProperty("whitelist", whitelistSetting.get());
         flagJson.addProperty("banned", bannedSetting.get());
 
-        innerJson.addProperty("address", ip);
-
+        innerJson.addProperty("address", this.ip);
         innerJson.addProperty("notes", notesSetting.get());
-
         innerJson.add("flags", flagJson);
         innerJson.addProperty("joined", true);
         mainJson.add("update", innerJson);
 
-        Http.post(Main.mainEndpoint).bodyJson(mainJson).header(
-                "authorization",
-                "Bearer " + McsdcSystem.get().getToken()
-            )
-            .sendString();
+        CompletableFuture.runAsync(() -> {
+            Http.post(Main.mainEndpoint).bodyJson(mainJson).header(
+                    "authorization",
+                    "Bearer " + McsdcSystem.get().getToken()
+                )
+                .sendString();
+        });
     }
 }

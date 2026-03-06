@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 public class ServerSearchBuilder {
     public static class Version {
@@ -33,7 +33,7 @@ public class ServerSearchBuilder {
         Boolean visited, griefed, modded, saved, whitelist, active, cracked;
 
         public Flags(Boolean visited, Boolean griefed, Boolean modded, Boolean saved,
-                     Boolean whitelist, Boolean active, Boolean cracked) {
+                Boolean whitelist, Boolean active, Boolean cracked) {
             this.visited = visited;
             this.griefed = griefed;
             this.modded = modded;
@@ -45,35 +45,46 @@ public class ServerSearchBuilder {
 
         public JsonObject toJsonObject() {
             JsonObject jsonObject = new JsonObject();
-            if (visited != null) jsonObject.addProperty("visited", visited);
-            if (griefed != null) jsonObject.addProperty("griefed", griefed);
-            if (modded != null) jsonObject.addProperty("modded", modded);
-            if (saved != null) jsonObject.addProperty("saved", saved);
-            if (whitelist != null) jsonObject.addProperty("whitelist", whitelist);
-            if (active != null) jsonObject.addProperty("active", active);
-            if (cracked != null) jsonObject.addProperty("cracked", cracked);
+            if (visited != null)
+                jsonObject.addProperty("visited", visited);
+            if (griefed != null)
+                jsonObject.addProperty("griefed", griefed);
+            if (modded != null)
+                jsonObject.addProperty("modded", modded);
+            if (saved != null)
+                jsonObject.addProperty("saved", saved);
+            if (whitelist != null)
+                jsonObject.addProperty("whitelist", whitelist);
+            if (active != null)
+                jsonObject.addProperty("active", active);
+            if (cracked != null)
+                jsonObject.addProperty("cracked", cracked);
             return jsonObject;
         }
     }
 
-    public static class Extra{
+    public static class Extra {
         Boolean hasHistory, hasNotes;
         HashMap<MOTD, Boolean> motds = null;
 
-        public Extra(Boolean hasHistory, Boolean hasNotes, @Nullable HashMap<MOTD, Boolean> motds){
+        public Extra(Boolean hasHistory, Boolean hasNotes, @Nullable HashMap<MOTD, Boolean> motds) {
             this.hasHistory = hasHistory;
             this.hasNotes = hasNotes;
             this.motds = motds;
         }
 
-        public JsonObject toJsonObject(){
+        public JsonObject toJsonObject() {
             JsonObject jsonObject = new JsonObject();
             JsonObject motdJsonObject = new JsonObject();
-            if (hasHistory != null) jsonObject.addProperty("has_history", hasHistory);
-            if (hasNotes != null) jsonObject.addProperty("has_notes", hasHistory);
-            if (motds != null){
-                for (MOTD value : motds.keySet()) {
-                    motdJsonObject.addProperty(value.getName(), value.shouldSearch());
+            if (hasHistory != null)
+                jsonObject.addProperty("has_history", hasHistory);
+            if (hasNotes != null)
+                jsonObject.addProperty("has_notes", hasNotes);
+            if (motds != null) {
+                for (Map.Entry<MOTD, Boolean> entry : motds.entrySet()) {
+                    if (entry.getValue() != null) {
+                        motdJsonObject.addProperty(entry.getKey().getName(), entry.getValue());
+                    }
                 }
 
                 jsonObject.add("motd", motdJsonObject);
@@ -115,4 +126,3 @@ public class ServerSearchBuilder {
         return rootJson;
     }
 }
-

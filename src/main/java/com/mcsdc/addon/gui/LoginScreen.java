@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.utils.network.Http;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,43 +47,40 @@ public class LoginScreen extends WindowScreen {
 
         add(theme.button("Submit")).expandX().widget().action = () -> {
             reload();
+
+            if (tokenSetting.get().isEmpty()){
+                add(theme.label("Please enter a token to login."));
+                return;
+            }
+
             CompletableFuture.supplyAsync(() -> {
-                if (tokenSetting.get().isEmpty()){
-                    add(theme.label("Please enter a token to login."));
+                JsonObject authJson = new JsonObject();
+                JsonObject loginJson = new JsonObject();
+                loginJson.addProperty("login", tokenSetting.get());
+                authJson.add("auth", loginJson);
 
-                    return null;
-                }
-
-                String request = "{\"auth\":{\"login\":\"%s\"}}".formatted(tokenSetting.get());
-                String response = Http.post(Main.mainEndpoint).bodyJson(request).sendString();
+                String response = Http.post(Main.mainEndpoint).bodyJson(authJson).sendString();
                 if (response == null){
-                    add(theme.label("Invalid token."));
                     return null;
                 }
 
                 JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
-
-                // Extract the "data" object
                 JsonObject data = jsonObject.getAsJsonObject("data");
 
-                // Extract the "name" and "perms" values
                 String name = data.get("name").getAsString();
                 int perms = data.get("perms").getAsInt();
 
-                Map<String, Integer> map = new HashMap<>();
-                map.put(name, perms);
-
-                return map;
+                return Map.entry(name, perms);
             }).thenAccept(response -> {
-                Main.mc.execute(() -> {
-                    if (response == null) return;
-
-                    String extractedName = response.keySet().iterator().next();
-                    int extractedPerms = response.get(extractedName);
+                mc.execute(() -> {
+                    if (response == null) {
+                        add(theme.label("Invalid token."));
+                        return;
+                    }
 
                     McsdcSystem.get().setToken(tokenSetting.get());
-                    McsdcSystem.get().setUsername(extractedName);
-                    McsdcSystem.get().setLevel(extractedPerms);
+                    McsdcSystem.get().setUsername(response.getKey());
+                    McsdcSystem.get().setLevel(response.getValue());
 
                     mc.setScreen(this.parent);
                     this.parent.reload();

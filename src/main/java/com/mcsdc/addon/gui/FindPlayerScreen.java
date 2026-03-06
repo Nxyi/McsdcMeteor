@@ -1,13 +1,11 @@
 package com.mcsdc.addon.gui;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mcsdc.addon.Main;
 import com.mcsdc.addon.MultiplayerScreenUtils;
 import com.mcsdc.addon.system.FindPlayerSearchBuilder;
 import com.mcsdc.addon.system.McsdcSystem;
 import com.mcsdc.addon.system.ServerStorage;
+import com.google.gson.JsonObject;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
@@ -25,9 +23,10 @@ import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FindPlayerScreen extends WindowScreen {
     private static FindPlayerScreen instance = null;
@@ -78,28 +77,41 @@ public class FindPlayerScreen extends WindowScreen {
             reload();
             if (playerSetting.get().isEmpty()){
                 add(theme.label("Enter a name/uuid")).expandX();
+                return;
             }
 
             CompletableFuture.supplyAsync(() -> {
                 JsonObject toSearch = FindPlayerSearchBuilder.create(playerSetting.get());
                 return Http.post(Main.mainEndpoint).bodyJson(toSearch).header("authorization", "Bearer " + McsdcSystem.get().getToken()).sendStringResponse().body();
             }).thenAccept(response -> {
-                List<ServerStorage> extractedServers = extractServerInfo(response);
-                if (extractedServers.isEmpty() || response == null){
-                    add(theme.label("No servers found."));
-                    return;
-                }
+                mc.execute(() -> {
+                    if (response == null) {
+                        add(theme.label("No servers found."));
+                        return;
+                    }
 
-                add(theme.button("add all")).expandX().widget().action = () -> {
-                    extractedServers.forEach((server) -> {
-                        ServerInfo info = new ServerInfo("Mcsdc " + server.ip(), server.ip(), ServerInfo.ServerType.OTHER);
-                        multiplayerScreen.getServerList().add(info, false);
-                    });
-                    MultiplayerScreenUtils.save(this.multiplayerScreen);
-                    MultiplayerScreenUtils.reload(this.multiplayerScreen);
-                };
+                    List<ServerStorage> extractedServers;
+                    try {
+                        extractedServers = ServerStorage.fromJsonArray(response);
+                    } catch (Exception e) {
+                        add(theme.label("Error parsing response."));
+                        return;
+                    }
 
-                Main.mc.execute(() -> {
+                    if (extractedServers.isEmpty()) {
+                        add(theme.label("No servers found."));
+                        return;
+                    }
+
+                    add(theme.button("add all")).expandX().widget().action = () -> {
+                        extractedServers.forEach((server) -> {
+                            ServerInfo info = new ServerInfo("Mcsdc " + server.ip(), server.ip(), ServerInfo.ServerType.OTHER);
+                            multiplayerScreen.getServerList().add(info, false);
+                        });
+                        MultiplayerScreenUtils.save(this.multiplayerScreen);
+                        MultiplayerScreenUtils.reload(this.multiplayerScreen);
+                    };
+
                     WTable table = add(theme.table()).widget();
 
                     table.add(theme.label("Server IP"));
@@ -108,7 +120,6 @@ public class FindPlayerScreen extends WindowScreen {
                     table.add(theme.horizontalSeparator()).expandX();
                     table.row();
 
-                    // Iterate through the extracted server data
                     extractedServers.forEach((server) -> {
                         String serverIP = server.ip();
                         String serverVersion = server.version();
@@ -127,13 +138,13 @@ public class FindPlayerScreen extends WindowScreen {
 
                         WButton joinServerButton = theme.button("Join Server");
                         joinServerButton.action = () ->
-                            ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), Main.mc,
+                            ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
                                 ServerAddress.parse(serverIP), new ServerInfo("", serverIP, ServerInfo.ServerType.OTHER), false, null);
 
 
                         WButton serverInfoButton = theme.button("Server Info");
                         serverInfoButton.action = () -> {
-                            Main.mc.setScreen(new ServerInfoScreen(serverIP));
+                            mc.setScreen(new ServerInfoScreen(serverIP));
                         };
 
                         table.add(addServerButton);
@@ -144,21 +155,6 @@ public class FindPlayerScreen extends WindowScreen {
                 });
             });
         };
-    }
-
-    public static List<ServerStorage> extractServerInfo(String jsonResponse) {
-        List<ServerStorage> serverStorageList = new ArrayList<>();
-        JsonArray array = JsonParser.parseString(jsonResponse).getAsJsonArray();
-
-        array.forEach(node -> {
-            String address = node.getAsJsonObject().get("address").getAsString();
-            String version = node.getAsJsonObject().get("version").getAsString();
-            long lastscanned = node.getAsJsonObject().get("last_scanned").getAsLong();
-            long lastseen = node.getAsJsonObject().get("last_seen_online").getAsLong();
-            serverStorageList.add(new ServerStorage(address, version, lastscanned, lastseen));
-        });
-
-        return serverStorageList;
     }
 
     @Override

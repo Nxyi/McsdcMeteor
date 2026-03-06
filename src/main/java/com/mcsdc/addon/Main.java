@@ -7,7 +7,6 @@ import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
-import net.minecraft.client.MinecraftClient;
 import org.meteordev.starscript.value.Value;
 import org.slf4j.Logger;
 
@@ -16,11 +15,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class Main extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
     public static String mainEndpoint = "https://interact.mcsdc.online/api";
-    public static MinecraftClient mc = MinecraftClient.getInstance();
 
     @Override
     public void onInitialize() {
-        LOG.info("Initializing Meteor Addon Template");
+        LOG.info("Initializing mcsdc.");
         Commands.add(new TicketIDCommand());
         MeteorStarscript.ss.set("ticketID", () -> Value.string(getTicketID()));
     }
@@ -32,12 +30,12 @@ public class Main extends MeteorAddon {
 
     @Override
     public GithubRepo getRepo() {
-        return new GithubRepo("MeteorDevelopment", "meteor-addon-template");
+        return new GithubRepo("Nxyi", "McsdcMeteor");
     }
 
     public static String getTicketID(){
         if (mc == null || mc.getNetworkHandler() == null) return "";
 
-        return TicketIDGenerator.generateTicketID(MinecraftClient.getInstance().getNetworkHandler().getServerInfo().address);
+        return TicketIDGenerator.generateTicketID(mc.getNetworkHandler().getServerInfo().address);
     }
 }

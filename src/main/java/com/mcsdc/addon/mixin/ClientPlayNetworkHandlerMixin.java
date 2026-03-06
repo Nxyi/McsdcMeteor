@@ -19,16 +19,8 @@ public class ClientPlayNetworkHandlerMixin {
         McsdcSystem system = McsdcSystem.get();
         ServerInfo info = MeteorClient.mc.getNetworkHandler().getServerInfo();
         if(info == null) return;
-        ServerStorage server = system.getRecentServerWithIp(info.address);
 
-        if (system.getRecentServers().contains(server)){
-            system.getRecentServers().remove(server);
-            system.getRecentServers().add(server);
-            return;
-        }
-
-        system.getRecentServers().add(new ServerStorage(info.address, info.version.getString(), null, null));
-
+        system.addRecentServer(new ServerStorage(info.address, info.version.getString(), null, null));
     }
 
 }

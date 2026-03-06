@@ -4,14 +4,12 @@ public class TicketIDGenerator {
 
     private static final int DEFAULT_PORT = 25565;
 
-
-    // google code cause im lazy
     public static String generateTicketID(String ipAndPort) {
         if (ipAndPort == null || ipAndPort.isEmpty()) {
-            throw new IllegalArgumentException("Input cannot be null or empty");
+            return "";
         }
 
-        if (!TicketIDGenerator.isValidIPv4WithPort(ipAndPort)) return "";
+        try {
 
         String ip;
         int port = DEFAULT_PORT;
@@ -33,7 +31,6 @@ public class TicketIDGenerator {
             throw new IllegalArgumentException("Invalid format: must be IP or IP:port");
         }
 
-        // Validate IP
         String[] ipParts = ip.split("\\.");
         if (ipParts.length != 4) {
             throw new IllegalArgumentException("Invalid IPv4 address: " + ip);
@@ -48,10 +45,12 @@ public class TicketIDGenerator {
             ipValue = (ipValue << 8) | byteVal;
         }
 
-        // Combine IP and port: shift IP by 16 bits and add port
         long combined = (ipValue << 16) | (port & 0xFFFF);
 
         return Long.toString(combined, 36).toUpperCase();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static String decodeTicketID(String ticketID) {
@@ -85,7 +84,6 @@ public class TicketIDGenerator {
         String ip = parts[0];
         String portStr = parts[1];
 
-        // Validate port
         int port;
         try {
             port = Integer.parseInt(portStr);
@@ -96,7 +94,6 @@ public class TicketIDGenerator {
             return false;
         }
 
-        // Validate IP
         String[] ipParts = ip.split("\\.");
         if (ipParts.length != 4) {
             return false;
