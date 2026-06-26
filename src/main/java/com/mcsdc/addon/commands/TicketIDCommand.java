@@ -3,7 +3,7 @@ package com.mcsdc.addon.commands;
 import com.mcsdc.addon.Main;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 
 public class TicketIDCommand extends Command {
     public TicketIDCommand() {
@@ -11,9 +11,9 @@ public class TicketIDCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> literalArgumentBuilder) {
+    public void build(LiteralArgumentBuilder<ClientSuggestionProvider> literalArgumentBuilder) {
         literalArgumentBuilder.executes(context -> {
-            mc.keyboard.setClipboard(Main.getTicketID());
+            mc.keyboardHandler.setClipboard(Main.getTicketID());
             return 1;
         });
     }

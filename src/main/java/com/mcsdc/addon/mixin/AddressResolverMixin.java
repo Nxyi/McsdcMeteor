@@ -1,8 +1,8 @@
 package com.mcsdc.addon.mixin;
 
 import com.google.common.net.InetAddresses;
-import net.minecraft.client.network.AddressResolver;
-import net.minecraft.client.network.ServerAddress;
+import net.minecraft.client.multiplayer.resolver.ServerAddressResolver;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,11 +11,11 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-@Mixin(AddressResolver.class)
+@Mixin(ServerAddressResolver.class)
 public interface AddressResolverMixin {
-    @ModifyVariable(method = "method_36903", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/net/InetAddress;getByName(Ljava/lang/String;)Ljava/net/InetAddress;", shift = At.Shift.AFTER), remap = false)
+    @ModifyVariable(method = "lambda$static$0", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/net/InetAddress;getByName(Ljava/lang/String;)Ljava/net/InetAddress;", shift = At.Shift.AFTER))
     private static InetAddress avoidDnsResolve(InetAddress inetAddress, ServerAddress address) throws UnknownHostException {
-        return patch(address.getAddress(), inetAddress);
+        return patch(address.getHost(), inetAddress);
     }
 
     @Unique

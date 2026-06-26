@@ -1,12 +1,13 @@
 package com.mcsdc.addon.mixin;
 
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerServerListWidget;
+
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.ServerSelectionList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MultiplayerScreen.class)
+@Mixin(JoinMultiplayerScreen.class)
 public interface MultiplayerScreenAccessor {
-    @Accessor("serverListWidget")
-    MultiplayerServerListWidget getServerListWidget();
+    @Accessor("serverSelectionList")
+    ServerSelectionList getServerListWidget();
 }

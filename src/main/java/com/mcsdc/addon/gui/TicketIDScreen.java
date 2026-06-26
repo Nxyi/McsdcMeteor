@@ -8,8 +8,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.settings.StringSetting;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -26,7 +26,7 @@ public class TicketIDScreen extends WindowScreen {
             .defaultValue("")
             .build());
 
-    public static TicketIDScreen instance(MultiplayerScreen multiplayerScreen, Screen parent) {
+    public static TicketIDScreen instance(JoinMultiplayerScreen multiplayerScreen, Screen parent) {
         if (instance == null) {
             instance = new TicketIDScreen();
         }
@@ -74,7 +74,7 @@ public class TicketIDScreen extends WindowScreen {
     }
 
     @Override
-    public void close() {
-        this.client.setScreen(parent);
+    public void onClose() {
+        this.minecraft.setScreen(parent);
     }
 }

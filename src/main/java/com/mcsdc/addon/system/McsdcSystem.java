@@ -1,10 +1,11 @@
 package com.mcsdc.addon.system;
 
+import com.mojang.datafixers.types.templates.CompoundList;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -116,16 +117,16 @@ public class McsdcSystem extends System<McsdcSystem> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound compound = new NbtCompound();
+    public CompoundTag toTag() {
+        CompoundTag compound = new CompoundTag();
         compound.putString("token", this.token);
         compound.putString("username", this.username);
         compound.putInt("level", this.level);
 
-        NbtList list = new NbtList();
+        ListTag list = new ListTag();
 
         recentServers.values().forEach((server) -> {
-            NbtCompound compound2 = new NbtCompound();
+            CompoundTag compound2 = new CompoundTag();
             compound2.putString("ip", server.ip());
             compound2.putString("version", server.version());
             list.add(compound2);
@@ -133,9 +134,9 @@ public class McsdcSystem extends System<McsdcSystem> {
 
         compound.put("recent", list);
 
-        NbtList queueList = new NbtList();
+        ListTag queueList = new ListTag();
         serverQueue.forEach((server) -> {
-            NbtCompound queueEntry = new NbtCompound();
+            CompoundTag queueEntry = new CompoundTag();
             queueEntry.putString("ip", server.ip());
             queueEntry.putString("version", server.version());
             if (server.lastScanned() != null) queueEntry.putLong("lastScanned", server.lastScanned());
@@ -149,15 +150,15 @@ public class McsdcSystem extends System<McsdcSystem> {
     }
 
     @Override
-    public McsdcSystem fromTag(NbtCompound tag) {
+    public McsdcSystem fromTag(CompoundTag tag) {
         this.token = tag.getString("token").get();
         this.username = tag.getString("username").get();
         this.level = tag.getInt("level").get();
 
-        NbtList list = tag.getList("recent").get();
+        ListTag list = tag.getList("recent").get();
         List<ServerStorage> tempList = new ArrayList<>();
-        for (NbtElement element : list) {
-            NbtCompound compound = (NbtCompound) element;
+        for (Tag element : list) {
+            CompoundTag compound = (CompoundTag) element;
             String ip = compound.getString("ip").get();
             String ver = compound.getString("version").get();
             tempList.add(new ServerStorage(ip, ver, null, null));
@@ -170,9 +171,9 @@ public class McsdcSystem extends System<McsdcSystem> {
 
         serverQueue.clear();
         if (tag.getList("serverQueue").isPresent()) {
-            NbtList queueList = tag.getList("serverQueue").get();
-            for (NbtElement element : queueList) {
-                NbtCompound queueEntry = (NbtCompound) element;
+            ListTag queueList = tag.getList("serverQueue").get();
+            for (Tag element : queueList) {
+                CompoundTag queueEntry = (CompoundTag) element;
                 String ip = queueEntry.getString("ip").get();
                 String version = queueEntry.getString("version").get();
                 Long lastScanned = queueEntry.getLong("lastScanned").orElse(null);

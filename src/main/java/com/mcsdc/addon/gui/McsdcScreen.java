@@ -8,7 +8,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -16,9 +16,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 
 public class McsdcScreen extends WindowScreen {
-    private final MultiplayerScreen multiplayerScreen;
+    private final JoinMultiplayerScreen multiplayerScreen;
 
-    public McsdcScreen(MultiplayerScreen multiplayerScreen) {
+    public McsdcScreen(JoinMultiplayerScreen multiplayerScreen) {
         super(GuiThemes.get(), "Mcsdc");
         this.multiplayerScreen = multiplayerScreen;
     }
@@ -28,7 +28,7 @@ public class McsdcScreen extends WindowScreen {
         String authToken = McsdcSystem.get().getToken();
 
         if (authToken.isEmpty()) {
-            this.client.setScreen(new LoginScreen(this));
+            this.minecraft.setScreen(new LoginScreen(this));
             return;
         }
 
@@ -61,21 +61,21 @@ public class McsdcScreen extends WindowScreen {
 
 
         newServersButton.action = () -> {
-            this.client.setScreen(FindNewServersScreen.instance(this.multiplayerScreen, this));
+            this.minecraft.setScreen(FindNewServersScreen.instance(this.multiplayerScreen, this));
         };
 
         findPlayersButton.action = () -> {
-            this.client.setScreen(FindPlayerScreen.instance(this.multiplayerScreen, this));
+            this.minecraft.setScreen(FindPlayerScreen.instance(this.multiplayerScreen, this));
         };
 
         recentServersButton.action = () -> {
-            this.client.setScreen(new RecentServersScreen(this.multiplayerScreen));
+            this.minecraft.setScreen(new RecentServersScreen(this.multiplayerScreen));
         };
 
         removeServersButton.action = () -> {
-            for (int i = 0; i < this.multiplayerScreen.getServerList().size(); i++) {
-                if (this.multiplayerScreen.getServerList().get(i).name.startsWith("Mcsdc")) {
-                    this.multiplayerScreen.getServerList().remove(this.multiplayerScreen.getServerList().get(i));
+            for (int i = 0; i < this.multiplayerScreen.getServers().size(); i++) {
+                if (this.multiplayerScreen.getServers().get(i).name.startsWith("Mcsdc")) {
+                    this.multiplayerScreen.getServers().remove(this.multiplayerScreen.getServers().get(i));
                     i--;
                 }
             }
@@ -85,14 +85,14 @@ public class McsdcScreen extends WindowScreen {
         };
 
         tickedIdScreenButton.action = () -> {
-            this.client.setScreen(TicketIDScreen.instance(this.multiplayerScreen, this));
+            this.minecraft.setScreen(TicketIDScreen.instance(this.multiplayerScreen, this));
         };
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
         MultiplayerScreenUtils.reload(this.multiplayerScreen);
-        this.client.setScreen(this.multiplayerScreen);
+        this.minecraft.setScreen(this.multiplayerScreen);
     }
 }

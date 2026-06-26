@@ -12,13 +12,13 @@ import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.network.ServerInfo.ServerType;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.ServerInfo;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class ServerInfoScreen extends WindowScreen {
                 table.add(
                         theme.label("Ip: %s".formatted(this.ip)));
                 table.add(theme.button("Copy")).widget().action = () -> {
-                    mc.keyboard.setClipboard(this.ip);
+                    mc.keyboardHandler.setClipboard(this.ip);
                 };
 
                 table.row();
@@ -85,7 +85,7 @@ public class ServerInfoScreen extends WindowScreen {
                 table.add(
                         theme.label("ID: %s".formatted(ticketID)));
                 table.add(theme.button("Copy")).widget().action = () -> {
-                    mc.keyboard.setClipboard(ticketID);
+                    mc.keyboardHandler.setClipboard(ticketID);
                 };
 
                 table.row();
@@ -184,22 +184,22 @@ public class ServerInfoScreen extends WindowScreen {
                             new CrackedAccount(info.name).login();
                         };
 
-                        if (mc.world == null) {
+                        if (mc.level == null) {
                             accounts.add(theme.button("Login & join")).expandX().widget().action = () -> {
                                 new CrackedAccount(info.name).login();
 
-                                ServerInfo serverInfo = new ServerInfo("Mcsdc " + this.ip, this.ip, ServerType.OTHER);
-                                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
-                                        ServerAddress.parse(serverInfo.address), serverInfo, false, null);
+                                ServerData serverInfo = new ServerData("Mcsdc " + this.ip, this.ip, ServerData.Type.OTHER);
+                                ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), mc,
+                                        ServerAddress.parseString(serverInfo.ip), serverInfo, false, null);
                             };
                         } else {
                             accounts.add(theme.button("Login & rejoin")).expandX().widget().action = () -> {
                                 new CrackedAccount(info.name).login();
 
-                                ServerInfo serverInfo = mc.getNetworkHandler().getServerInfo();
-                                mc.world.disconnect(Text.of(""));
-                                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
-                                        ServerAddress.parse(serverInfo.address), serverInfo, false, null);
+                                ServerData serverInfo = mc.getConnection().getServerData();
+                                mc.level.disconnect(Component.empty());
+                                ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), mc,
+                                        ServerAddress.parseString(serverInfo.ip), serverInfo, false, null);
                             };
                         }
 

@@ -34,8 +34,8 @@ public class Main extends MeteorAddon {
     }
 
     public static String getTicketID(){
-        if (mc == null || mc.getNetworkHandler() == null) return "";
+        if (mc == null || mc.getConnection() == null) return "";
 
-        return TicketIDGenerator.generateTicketID(mc.getNetworkHandler().getServerInfo().address);
+        return TicketIDGenerator.generateTicketID(mc.getConnection().getServerData().ip);
     }
 }

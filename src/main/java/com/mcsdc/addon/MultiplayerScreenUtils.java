@@ -1,20 +1,20 @@
 package com.mcsdc.addon;
 
 import com.mcsdc.addon.mixin.MultiplayerScreenAccessor;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 
 public class MultiplayerScreenUtils {
-    public static void save(MultiplayerScreen multiplayerScreen) {
-        multiplayerScreen.getServerList().saveFile();
+    public static void save(JoinMultiplayerScreen multiplayerScreen) {
+        multiplayerScreen.getServers().save();
     }
 
-    public static void reload(MultiplayerScreen multiplayerScreen){
+    public static void reload(JoinMultiplayerScreen multiplayerScreen){
         MultiplayerScreenAccessor msa = getAccessor(multiplayerScreen);
-        msa.getServerListWidget().setServers(multiplayerScreen.getServerList());
+        msa.getServerListWidget().updateOnlineServers(multiplayerScreen.getServers());
     }
 
 
-    public static MultiplayerScreenAccessor getAccessor(MultiplayerScreen multiplayerScreen){
+    public static MultiplayerScreenAccessor getAccessor(JoinMultiplayerScreen multiplayerScreen){
         return (MultiplayerScreenAccessor) multiplayerScreen;
     }
 }

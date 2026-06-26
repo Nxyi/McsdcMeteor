@@ -7,20 +7,20 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RecentServersScreen extends WindowScreen {
-    MultiplayerScreen multiplayerScreen;
+    JoinMultiplayerScreen multiplayerScreen;
 
-    public RecentServersScreen(MultiplayerScreen multiplayerScreen) {
+    public RecentServersScreen(JoinMultiplayerScreen multiplayerScreen) {
         super(GuiThemes.get(), "Recent Servers");
         this.multiplayerScreen = multiplayerScreen;
     }
@@ -58,8 +58,8 @@ public class RecentServersScreen extends WindowScreen {
 
             WButton addServerButton = theme.button("Add Server");
             addServerButton.action = () -> {
-                ServerInfo info = new ServerInfo("Mcsdc " + serverIP, serverIP, ServerInfo.ServerType.OTHER);
-                multiplayerScreen.getServerList().add(info, false);
+                ServerData info = new ServerData("Mcsdc " + serverIP, serverIP, ServerData.Type.OTHER);
+                multiplayerScreen.getServers().add(info, false);
                 MultiplayerScreenUtils.save(this.multiplayerScreen);
                 MultiplayerScreenUtils.reload(this.multiplayerScreen);
                 addServerButton.visible = false;
@@ -67,8 +67,8 @@ public class RecentServersScreen extends WindowScreen {
 
             WButton joinServerButton = theme.button("Join Server");
             joinServerButton.action = () -> {
-                ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
-                    ServerAddress.parse(serverIP), new ServerInfo("", serverIP, ServerInfo.ServerType.OTHER), false, null);
+                ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), mc,
+                    ServerAddress.parseString(serverIP), new ServerData("", serverIP, ServerData.Type.OTHER), false, null);
             };
             WButton serverInfoButton = theme.button("Server Info");
             serverInfoButton.action = () -> {

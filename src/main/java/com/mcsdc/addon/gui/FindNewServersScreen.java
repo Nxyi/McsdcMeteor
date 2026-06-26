@@ -15,12 +15,12 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -29,7 +29,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FindNewServersScreen extends WindowScreen {
     private static FindNewServersScreen instance = null;
-    private MultiplayerScreen multiplayerScreen;
+    private JoinMultiplayerScreen multiplayerScreen;
     private Screen parent;
 
     private final Settings settings = new Settings();
@@ -208,7 +208,7 @@ public class FindNewServersScreen extends WindowScreen {
 
     WContainer settingsContainer;
 
-    public static FindNewServersScreen instance(MultiplayerScreen multiplayerScreen, Screen parent) {
+    public static FindNewServersScreen instance(JoinMultiplayerScreen multiplayerScreen, Screen parent) {
         if (instance == null) {
             instance = new FindNewServersScreen();
         }
@@ -218,7 +218,7 @@ public class FindNewServersScreen extends WindowScreen {
         return instance;
     }
 
-    public void setMultiplayerScreen(MultiplayerScreen multiplayerScreen) {
+    public void setMultiplayerScreen(JoinMultiplayerScreen multiplayerScreen) {
         this.multiplayerScreen = multiplayerScreen;
     }
 
@@ -335,8 +335,8 @@ public class FindNewServersScreen extends WindowScreen {
 
         buttons.add(theme.button("add all")).expandX().widget().action = () -> {
             extractedServers.forEach((server) -> {
-                ServerInfo info = new ServerInfo("Mcsdc " + server.ip(), server.ip(), ServerInfo.ServerType.OTHER);
-                multiplayerScreen.getServerList().add(info, false);
+                ServerData info = new ServerData("Mcsdc " + server.ip(), server.ip(), ServerData.Type.OTHER);
+                multiplayerScreen.getServers().add(info, false);
             });
             MultiplayerScreenUtils.save(this.multiplayerScreen);
             MultiplayerScreenUtils.reload(this.multiplayerScreen);
@@ -372,8 +372,8 @@ public class FindNewServersScreen extends WindowScreen {
 
                 WButton addServerButton = theme.button("Add Server");
                 addServerButton.action = () -> {
-                    ServerInfo info = new ServerInfo("Mcsdc " + serverIP, serverIP, ServerInfo.ServerType.OTHER);
-                    multiplayerScreen.getServerList().add(info, false);
+                    ServerData info = new ServerData("Mcsdc " + serverIP, serverIP, ServerData.Type.OTHER);
+                    multiplayerScreen.getServers().add(info, false);
                     MultiplayerScreenUtils.save(this.multiplayerScreen);
                     MultiplayerScreenUtils.reload(this.multiplayerScreen);
                     addServerButton.visible = false;
@@ -381,8 +381,8 @@ public class FindNewServersScreen extends WindowScreen {
 
                 WButton joinServerButton = theme.button("Join Server");
                 joinServerButton.action = () ->
-                    ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), mc,
-                        ServerAddress.parse(serverIP), new ServerInfo("", serverIP, ServerInfo.ServerType.OTHER), false, null);
+                    ConnectScreen.startConnecting(new JoinMultiplayerScreen(new TitleScreen()), mc,
+                        ServerAddress.parseString(serverIP), new ServerData("", serverIP, ServerData.Type.OTHER), false, null);
 
                 WButton serverInfoButton = theme.button("Server Info");
                 serverInfoButton.action = () -> {
@@ -410,6 +410,8 @@ public class FindNewServersScreen extends WindowScreen {
 
     public enum VersionEnum {
         ANY("any", -1),
+        _26_2("1.21.11", 776),
+        _26_1("1.21.11", 775),
         _1_21_11("1.21.11", 774),
         _1_21_10("1.21.10", 773),
         _1_21_9("1.21.9", 773),
@@ -477,7 +479,7 @@ public class FindNewServersScreen extends WindowScreen {
     }
 
     @Override
-    public void close() {
-        this.client.setScreen(parent);
+    public void onClose() {
+        this.minecraft.setScreen(parent);
     }
 }
